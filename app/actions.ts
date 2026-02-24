@@ -2,30 +2,12 @@
 
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import {
-  addMeditationSession,
-  addMoodEntry,
-  createUser,
-  findUserByUsername,
-  updateReminderTimes,
-  updateUserNotifications
-} from "@/lib/db";
+import { createUser, findUserByUsername, updateUserNotifications } from "@/lib/db";
 import { clearSession, requireSession, saveSession } from "@/lib/auth";
-import type { MoodValue } from "@/lib/types";
 
 const authSchema = z.object({
-  username: z.string().trim().min(3, "Username must be at least 3 characters").max(24),
+  username: z.string().min(3, "Username must be at least 3 characters").max(24),
   password: z.string().min(6, "Password must be at least 6 characters")
-});
-
-const reminderSchema = z.object({
-  firstTime: z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM format"),
-  secondTime: z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM format")
-});
-
-const moodSchema = z.object({
-  value: z.enum(["great", "good", "okay", "stressed"]),
-  note: z.string().max(140).optional()
 });
 
 export type ActionState = {
@@ -60,10 +42,6 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
     username: parsed.data.username,
     passwordHash,
     notificationsEnabled: true,
-    reminderTimes: ["10:00", "16:00"] as [string, string],
-    meditationSessions: 0,
-    meditationHistory: [],
-    moodHistory: [],
     createdAt: new Date().toISOString()
   };
 
@@ -103,36 +81,4 @@ export async function logoutAction() {
 export async function toggleNotificationsAction(enabled: boolean) {
   const session = await requireSession();
   await updateUserNotifications(session.username, enabled);
-}
-
-export async function saveReminderTimesAction(firstTime: string, secondTime: string): Promise<ActionState> {
-  const parsed = reminderSchema.safeParse({ firstTime, secondTime });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid reminder times" };
-  }
-
-  const session = await requireSession();
-  await updateReminderTimes(session.username, parsed.data.firstTime, parsed.data.secondTime);
-  return { success: "Reminder times updated" };
-}
-
-export async function completeMeditationAction() {
-  const session = await requireSession();
-  await addMeditationSession(session.username);
-}
-
-export async function saveMoodAction(value: MoodValue, note?: string): Promise<ActionState> {
-  const parsed = moodSchema.safeParse({ value, note });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid mood entry" };
-  }
-
-  const session = await requireSession();
-  await addMoodEntry(session.username, {
-    value: parsed.data.value,
-    note: parsed.data.note,
-    createdAt: new Date().toISOString()
-  });
-
-  return { success: "Mood saved" };
 }

@@ -11,13 +11,5 @@ export default async function HomePage() {
     redirect("/");
   }
 
-  return (
-    <HomeTabs
-      username={user.username}
-      notificationsEnabled={user.notificationsEnabled}
-      reminderTimes={user.reminderTimes}
-      meditationSessions={user.meditationSessions}
-      moodHistory={user.moodHistory}
-    />
-  );
+  return <HomeTabs username={user.username} notificationsEnabled={user.notificationsEnabled} />;
 }
