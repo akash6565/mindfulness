@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import "./guidedSessions.css"; // NEW import for breathing animation
 
 export default async function LandingPage() {
   const session = await getSession();
@@ -27,6 +28,7 @@ export default async function LandingPage() {
         <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
           <Link href="/login" style={buttonPrimary}>Log In</Link>
           <Link href="/signup" style={buttonSecondary}>Sign Up</Link>
+          <Link href="/guided-sessions" style={buttonTertiary}>Guided Sessions</Link> {/* NEW */}
         </div>
       </section>
     </main>
@@ -46,6 +48,15 @@ const buttonSecondary: CSSProperties = {
   border: "1px solid #cbd5e1",
   background: "white",
   color: "#1e293b",
+  borderRadius: 10,
+  padding: "10px 12px",
+  fontWeight: 600
+};
+
+const buttonTertiary: CSSProperties = {
+  border: "none",
+  background: "#22c55e",
+  color: "white",
   borderRadius: 10,
   padding: "10px 12px",
   fontWeight: 600
